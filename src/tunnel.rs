@@ -134,7 +134,7 @@ impl Tunnel {
             if self.ignore_duplicate && resp.message.ends_with("address is already being used") {
                 self.address_public = resp.tunnel[0].address_public.clone();
                 self.address_mdns = resp.tunnel[0].address_mdns.clone();
-                self.id = resp.tunnel[0].id.clone();
+                self.id = Some(resp.tunnel[0].id.clone());
 
                 self.show_banner().await;
                 return Ok(());
@@ -144,7 +144,7 @@ impl Tunnel {
 
         self.address_public = resp.tunnel[0].address_public.clone();
         self.address_mdns = resp.tunnel[0].address_mdns.clone();
-        self.id = resp.tunnel[0].id.clone();
+        self.id = Some(resp.tunnel[0].id.clone());
 
         self.show_banner().await;
 
@@ -168,11 +168,9 @@ impl Tunnel {
             return Err("public address is not requested by client".into());
         }
 
-        if let TunnelType::HTTP = self.tunnel_type {
-            if !self.address_public.contains(':') {
-                self.update_public_url_port().await?;
-                return Err("tunnel is using a random port, but it has not been assigned yet. please try again later".into());
-            }
+        if !self.address_public.contains(':') {
+            self.update_public_url_port().await?;
+            return Err("tunnel is using a random port, but it has not been assigned yet. please try again later".into());
         }
 
         Ok(self.address_public.clone())
@@ -243,5 +241,12 @@ impl Tunnel {
 struct Response {
     success: bool,
     message: String,
-    tunnel: Vec<Tunnel>,
+    tunnel: Vec<TunnelResponse>,
+}
+
+#[derive(Deserialize, Debug, Serialize)]
+struct TunnelResponse {
+    address_public: String,
+    address_mdns: String,
+    id: String,
 }
