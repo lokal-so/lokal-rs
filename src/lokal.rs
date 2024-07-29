@@ -8,6 +8,7 @@ pub struct Lokal {
     pub base_url: String,
     pub basic_auth: (String, String),
     pub token: String,
+    #[serde(skip)]
     pub rest: Client,
 }
 
