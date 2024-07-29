@@ -136,7 +136,7 @@ impl Tunnel {
                 self.address_mdns = resp.tunnel[0].address_mdns.clone();
                 self.id = resp.tunnel[0].id.clone();
 
-                self.show_banner();
+                self.show_banner().await;
                 return Ok(());
             }
             return Err(resp.message.into());
@@ -146,7 +146,7 @@ impl Tunnel {
         self.address_mdns = resp.tunnel[0].address_mdns.clone();
         self.id = resp.tunnel[0].id.clone();
 
-        self.show_banner();
+        self.show_banner().await;
 
         Ok(())
     }
@@ -163,7 +163,7 @@ impl Tunnel {
         Ok(self.address_mdns.clone())
     }
 
-    pub async fn get_public_address(&self) -> Result<String, Box<dyn Error>> {
+    pub async fn get_public_address(&mut self) -> Result<String, Box<dyn Error>> {
         if self.address_public.is_empty() {
             return Err("public address is not requested by client".into());
         }
@@ -178,7 +178,7 @@ impl Tunnel {
         Ok(self.address_public.clone())
     }
 
-    pub async fn update_public_url_port(&self) -> Result<(), Box<dyn Error>> {
+    pub async fn update_public_url_port(&mut self) -> Result<(), Box<dyn Error>> {
         let client = Client::new();
         let resp = client
             .get(&format!("http://127.0.0.1:6174/api/tunnel/info/{}", self.id.as_ref().unwrap()))
@@ -204,7 +204,7 @@ impl Tunnel {
         Ok(())
     }
 
-    pub async fn show_banner(&self) {
+    pub async fn show_banner(&mut self) {
         if !self.startup_banner {
             return;
         }
