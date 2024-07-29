@@ -119,7 +119,7 @@ impl Tunnel {
 
         let client = Client::new();
         let resp = client
-            .post("http://127.0.0.1:6174/api/tunnel/start")
+            .post(format!("{}/api/tunnel/start", self.lokal.as_ref().unwrap().base_url))
             .json(&self)
             .send()
             .await?
@@ -179,7 +179,7 @@ impl Tunnel {
     pub async fn update_public_url_port(&mut self) -> Result<(), Box<dyn Error>> {
         let client = Client::new();
         let resp = client
-            .get(&format!("http://127.0.0.1:6174/api/tunnel/info/{}", self.id.as_ref().unwrap()))
+            .get(&format!("{}/api/tunnel/info/{}", self.lokal.as_ref().unwrap().base_url, self.id.as_ref().unwrap()))
             .send()
             .await?
             .json::<Response>()
