@@ -241,6 +241,7 @@ impl Tunnel {
 struct Response {
     success: bool,
     message: String,
+    #[serde(rename = "data")]
     tunnel: Vec<TunnelResponse>,
 }
 
