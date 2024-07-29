@@ -25,9 +25,9 @@ pub struct Options {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Tunnel {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub lokal: Option<Lokal>, // 
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip)]
+    pub lokal: Option<Lokal>,
+    #[serde(skip)]
     pub id: Option<String>,
     pub name: String,
     pub tunnel_type: TunnelType,
