@@ -126,15 +126,19 @@ impl Tunnel {
             .json::<Response>()
             .await?;
 
-        if resp.tunnel.is_empty() {
-            return Err("tunnel creation failing".into());
+        if let Some(ref tunnels) = resp.tunnel {
+            if tunnels.is_empty() {
+                return Err("tunnel creation failing".into());
+            }
         }
 
         if !resp.success {
             if self.ignore_duplicate && resp.message.ends_with("address is already being used") {
-                self.address_public = resp.tunnel[0].address_public.clone();
-                self.address_mdns = resp.tunnel[0].address_mdns.clone();
-                self.id = Some(resp.tunnel[0].id.clone());
+                if let Some(ref tunnels) = resp.tunnel {
+                    self.address_public = tunnels[0].address_public.clone();
+                    self.address_mdns = tunnels[0].address_mdns.clone();
+                    self.id = Some(tunnels[0].id.clone());
+                }
 
                 self.show_banner().await;
                 return Ok(());
@@ -142,9 +146,11 @@ impl Tunnel {
             return Err(resp.message.into());
         }
 
-        self.address_public = resp.tunnel[0].address_public.clone();
-        self.address_mdns = resp.tunnel[0].address_mdns.clone();
-        self.id = Some(resp.tunnel[0].id.clone());
+        if let Some(ref tunnels) = resp.tunnel {
+            self.address_public = tunnels[0].address_public.clone();
+            self.address_mdns = tunnels[0].address_mdns.clone();
+            self.id = Some(tunnels[0].id.clone());
+        }
 
         self.show_banner().await;
 
@@ -191,15 +197,17 @@ impl Tunnel {
             return Err(resp.message.into());
         }
 
-        if resp.tunnel.is_empty() {
-            return Err("could not get tunnel info".into());
+        if let Some(tunnels) = resp.tunnel {
+            if tunnels.is_empty() {
+                return Err("could not get tunnel info".into());
+            }
+    
+            if !tunnels[0].address_public.contains(':') {
+                return Err("could not get assigned port".into());
+            }
+    
+            self.address_public = tunnels[0].address_public.clone();
         }
-
-        if !resp.tunnel[0].address_public.contains(':') {
-            return Err("could not get assigned port".into());
-        }
-
-        self.address_public = resp.tunnel[0].address_public.clone();
 
         Ok(())
     }
@@ -244,7 +252,7 @@ struct Response {
     success: bool,
     message: String,
     #[serde(rename = "data")]
-    tunnel: Vec<TunnelResponse>,
+    tunnel: Option<Vec<TunnelResponse>>,
 }
 
 #[derive(Deserialize, Debug, Serialize)]
