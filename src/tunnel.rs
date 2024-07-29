@@ -1,8 +1,8 @@
-use serde::{Deserialize, Serialize};
-use reqwest::Client;
-use std::error::Error;
-use rand::Rng;
 use colored::Colorize;
+use rand::Rng;
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
+use std::error::Error;
 
 use crate::lokal::Lokal;
 
@@ -119,7 +119,10 @@ impl Tunnel {
 
         let client = Client::new();
         let resp = client
-            .post(format!("{}/api/tunnel/start", self.lokal.as_ref().unwrap().base_url))
+            .post(format!(
+                "{}/api/tunnel/start",
+                self.lokal.as_ref().unwrap().base_url
+            ))
             .json(&self)
             .send()
             .await?
@@ -187,7 +190,11 @@ impl Tunnel {
     pub async fn update_public_url_port(&mut self) -> Result<(), Box<dyn Error>> {
         let client = Client::new();
         let resp = client
-            .get(&format!("{}/api/tunnel/info/{}", self.lokal.as_ref().unwrap().base_url, self.id.as_ref().unwrap()))
+            .get(&format!(
+                "{}/api/tunnel/info/{}",
+                self.lokal.as_ref().unwrap().base_url,
+                self.id.as_ref().unwrap()
+            ))
             .send()
             .await?
             .json::<Response>()
@@ -201,11 +208,11 @@ impl Tunnel {
             if tunnels.is_empty() {
                 return Err("could not get tunnel info".into());
             }
-    
+
             if !tunnels[0].address_public.contains(':') {
                 return Err("could not get assigned port".into());
             }
-    
+
             self.address_public = tunnels[0].address_public.clone();
         }
 

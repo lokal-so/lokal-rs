@@ -1,9 +1,7 @@
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize)]
-#[derive(Deserialize)]
-#[derive(Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Lokal {
     pub base_url: String,
     pub basic_auth: (String, String),
