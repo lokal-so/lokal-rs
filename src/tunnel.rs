@@ -6,7 +6,7 @@ use colored::Colorize;
 
 use crate::lokal::Lokal;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum TunnelType {
     HTTP,
 }
@@ -168,9 +168,11 @@ impl Tunnel {
             return Err("public address is not requested by client".into());
         }
 
-        if !self.address_public.contains(':') {
-            self.update_public_url_port().await?;
-            return Err("tunnel is using a random port, but it has not been assigned yet. please try again later".into());
+        if self.tunnel_type != TunnelType::HTTP {
+            if !self.address_public.contains(':') {
+                self.update_public_url_port().await?;
+                return Err("tunnel is using a random port, but it has not been assigned yet. please try again later".into());
+            }
         }
 
         Ok(self.address_public.clone())
