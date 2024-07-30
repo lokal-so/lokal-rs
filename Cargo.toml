@@ -2,6 +2,16 @@
 name = "lokal-rs"
 version = "0.0.1"
 edition = "2021"
+authors = ["Rubi Jihantoro <jihantoro8@gmail.com>"]
+description = "Rust crates for interacting with Lokal.so Client REST API"
+documentation = "https://docs.rs/lokal-rs"
+readme = "README.md"
+homepage = "https://lokal.so/?ref=rust-crates"
+repository = "https://github.com/lokal-so/lokal-rs"
+license = "MIT"
+license-file = "LICENSE"
+keywords = ["tunnel", "tunneling", "networking", "http", "http-debugging"]
+categories = ["development-tools"]
 
 [dependencies]
 reqwest = { version = "0.12.5", features = ["json"] }
