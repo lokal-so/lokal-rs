@@ -7,7 +7,7 @@ use std::error::Error;
 
 use crate::lokal::Lokal;
 
-const SERVER_MIN_VERSION: &str = "v0.6.0";
+const SERVER_MIN_VERSION: &str = "0.6.0";
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum TunnelType {
