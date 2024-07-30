@@ -260,11 +260,7 @@ impl Tunnel {
         let color = colors[rng.gen_range(0..colors.len())];
         println!("{}", color(banner));
         println!();
-        println!(
-            "{}\t{}",
-            "Minimum Lokal Client".red(),
-            SERVER_MIN_VERSION
-        );
+        println!("{}\t{}", "Minimum Lokal Client".red(), SERVER_MIN_VERSION);
         if let Ok(val) = self.get_public_address().await {
             println!("{}", format!("Public Address \t\thttps://{}", val).cyan());
         }
