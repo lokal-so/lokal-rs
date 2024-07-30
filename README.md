@@ -16,7 +16,7 @@ use tokio;
 async fn main() {
     let address = "0.0.0.0:3000";
 
-    let lokal = Lokal::new_default().set_base_url("https://debugrust.local".to_string());
+    let lokal = Lokal::new_default();
 
     let mut tunnel = Tunnel::new(lokal)
         .set_local_address(address.to_string())
