@@ -1,10 +1,13 @@
 use colored::Colorize;
 use rand::Rng;
 use reqwest::Client;
+use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 
 use crate::lokal::Lokal;
+
+const SERVER_MIN_VERSION: &str = "v0.6.0";
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum TunnelType {
@@ -125,19 +128,33 @@ impl Tunnel {
             ))
             .json(&self)
             .send()
-            .await?
-            .json::<Response>()
             .await?;
 
-        if let Some(ref tunnels) = resp.tunnel {
+        // Check the Lokal-Server-Version header first
+        if let Some(lokal_version) = resp.headers().get("Lokal-Server-Version") {
+            let version_str = lokal_version.to_str()?;
+            let min_version = Version::parse(SERVER_MIN_VERSION)?;
+            let server_version = Version::parse(version_str)?;
+
+            if server_version < min_version {
+                return Err("Your local client is outdated, please update".into());
+            }
+        } else {
+            return Err("Your local client is outdated, please update".into());
+        }
+
+        // If we've passed the version check, parse the JSON
+        let data = resp.json::<Response>().await?;
+
+        if let Some(ref tunnels) = data.tunnel {
             if tunnels.is_empty() {
                 return Err("tunnel creation failing".into());
             }
         }
 
-        if !resp.success {
-            if self.ignore_duplicate && resp.message.ends_with("address is already being used") {
-                if let Some(ref tunnels) = resp.tunnel {
+        if !data.success {
+            if self.ignore_duplicate && data.message.ends_with("address is already being used") {
+                if let Some(ref tunnels) = data.tunnel {
                     self.address_public = tunnels[0].address_public.clone();
                     self.address_mdns = tunnels[0].address_mdns.clone();
                     self.id = Some(tunnels[0].id.clone());
@@ -146,10 +163,10 @@ impl Tunnel {
                 self.show_banner().await;
                 return Ok(());
             }
-            return Err(resp.message.into());
+            return Err(data.message.into());
         }
 
-        if let Some(ref tunnels) = resp.tunnel {
+        if let Some(ref tunnels) = data.tunnel {
             self.address_public = tunnels[0].address_public.clone();
             self.address_mdns = tunnels[0].address_mdns.clone();
             self.id = Some(tunnels[0].id.clone());
@@ -243,7 +260,11 @@ impl Tunnel {
         let color = colors[rng.gen_range(0..colors.len())];
         println!("{}", color(banner));
         println!();
-        println!("{}", "Minimum Lokal Client".red());
+        println!(
+            "{}\t{}",
+            "Minimum Lokal Client".red(),
+            SERVER_MIN_VERSION
+        );
         if let Ok(val) = self.get_public_address().await {
             println!("{}", format!("Public Address \t\thttps://{}", val).cyan());
         }
